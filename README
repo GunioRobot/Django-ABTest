@@ -24,58 +24,58 @@ INSTALLATION:
 EXAMPLES and USAGE:
 =====
 Example A. Testing conversion rates of the copy used of some anchor (binary dataset)
-    
+
     # 1. Define the test somewhere such as a `utils.py` file
         BCT = ABTest(title="Button Click Text 1.0", variates=["click me", "can't touch this", "new feature!"], default=0)
         # note default=0, this initializes the test to be fail (not clicked)
-    
+
     # 2. Set the experiment running, get_or_creates variate and saves to user's session, returns the variate to be used
         link_text = BCT.assign_experiment(request)
-    
+
     # 3. in a view pass `link_text` (the chosen variate) to the template
         context['link_text'] = link_text
-        
+
         # in the template output the variate in the desired place
         <a href="/button_clicked/">{{link_text}}</a>
-    
+
     # 4. in the view which corresponds to /button_clicked/, assign the experiment as a success (value=1)
         BCT.assign_result(request, value=1)
-    
+
     # 5. evaluate the experiment in a cron job or on an admin_page in two keys ways
-        # Case A. Manual inspection 
-        
+        # Case A. Manual inspection
+
         print UIT.stats()
         # you can view the mean, stddev, var, for each variate
-        
+
         winners, control = UIT.winners()
         # winners is a list of tuples (variate, confidence_is_better_than_control)
         # control is the variate given as the control (on initialization) or the worst performing variate
-        
+
         UIT.assign_winner(winners[0])
         # you can choose a winner manually and assign the results - here winner[0] is the best performing
-        
+
         # Case B. Automatic assignment of the winner based on some parameters (see below)
-        
+
         winner = UIT.evaluate(confidence=0.8)
         # the experiment will end and the top performing variate will be chosen and returned as the winner
         # if there is no winner with a confidence > 0.8, then evaluate returns None and experiment remains unfinished
-    
-    
+
+
 Example B. Testing the number of invites a user makes based on if there is a select-all button
-    
+
     # 1. Similarly define the test, but make sure binary=False as this allows value to be anything (i.e. numbers of invites)
         UIT = ABTest(title="User Invite 123", variates=[True, False], binary=False)
-    
+
     # 2. by not setting a default, the variate is only saved in the session and the test will only be saved in the db at step 4.
         show_button = UIT.assign_experiment(request)
         # this is good when the tested action is not the main one on the page
-            
+
     # 3. in the template use the variate how you like
         {% if show_button %}<input value="Select-All" onclick="select_all()">{% endif %}
-    
+
     # 4. in the view where you create the invites, save the result
         UIT.assign_result(request, value=len(invites))
-    
+
 
 Example C. Same as example A. but the link is in an email
     # 1. Define the same as before, but ensure session_persistent=False
@@ -92,7 +92,7 @@ Example C. Same as example A. but the link is in an email
         ELT.assign_result(value=True,result=link_id)
         # or can track and pass the variate itself
         ELT.assign_result(value=True,variate=link_text)
-    
+
 
 Initialization Options - ABTest(**options)
 =====
